@@ -12,7 +12,7 @@ module = Extension('cfilt',
         include_dirs = ['./cfilt', './cfilt/arm', np.get_include()], 
         extra_compile_args=['-std=c99', '-DARM_MATH_CM4', '-DTEST', '-Xlinker -dead_strip'])
 
-setup(name= 'CFILT',
+setup(name= 'cfilt',
         version = '1.0.1',
         description = 'This is a package',
         packages = find_packages(),

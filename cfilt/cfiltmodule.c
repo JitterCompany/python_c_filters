@@ -8,7 +8,7 @@
 #include "arm_math.h"
 #include "filter.h"
 
-#define MAX_FILTERS 25
+#define MAX_FILTERS 500
 
 static unsigned int num_filters64 = 0;
 static unsigned int num_filters32 = 0;

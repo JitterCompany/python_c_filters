@@ -130,7 +130,7 @@ def optimal_filter(q, fs):
     print("Optimal results for q = %d" % q)
     for k in results:
         x,y,data = zip(*results[k])
-        i = np.argmin(y)
+        i = np.argmax(y)
         print('Best choice with %d stages: low_cut_off_factor = %d, smallest value = %.6f' 
               %(k, x[i], y[i]))
         
