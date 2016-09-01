@@ -16,7 +16,6 @@ static Filter64 filters64[MAX_FILTERS];
 static Filter32 filters32[MAX_FILTERS];
 
 static PyObject *error;
-static PyObject* test(PyObject *self, PyObject *args);
 static PyObject* filter(PyObject *self, PyObject *args);
 
 static PyObject* filter64_init(PyObject *self, PyObject *args);
@@ -26,15 +25,58 @@ static PyObject* filter64_apply(PyObject *self, PyObject *args);
 static PyObject* filter32_apply(PyObject *self, PyObject *args);
 
 static PyMethodDef methods[] = {
-    {"test", test, METH_VARARGS, "Test this module"},
     {"filter64_init", filter64_init, METH_VARARGS, 
-        "Init a filter object that uses doubles internally."},
+        "Initialize a filter object that uses doubles internally.\n\n"
+        "Parameters\n"
+        "----------\n"
+        "filter: arraylike, dtype=float64\n"
+        "    list of second order filter sections (sos) as generated "
+        "by scipy.signal\n"
+        "Returns\n"
+        "-------\n"
+        "filter_handle: int\n"
+        "    filter index for cfilt. Pass this to other cfilt functions"
+    },
     {"filter32_init", filter32_init, METH_VARARGS, 
-        "Init a filter object that uses floats internally."},
+        "Initialize a filter object that uses floats internally.\n\n"
+        "Parameters\n"
+        "----------\n"
+        "filter: arraylike, dtype=float32\n"
+        "    list of second order filter sections (sos) as generated "
+        "by scipy.signal\n"
+        "Returns\n"
+        "-------\n"
+        "filter_handle: int\n"
+        "    filter index for cfilt. Pass this to other cfilt functions"
+
+        "Init a filter object that uses floats internally."
+    },
     {"filter64_apply", filter64_apply, METH_VARARGS, 
-        "Apply filter on input"},
+        "Apply filter on input data (doubles)\n\n"
+        "Parameters\n"
+        "----------\n"
+        "filter_handle: int\n"
+        "    So cfilt knows which filter to use.\n"
+        "x: numpy array, dtype: float64\n"
+        "    1 dimensional array with floating point data.\n\n"
+        "Returns\n"
+        "-------\n"
+        "y: arraylike: dtype: float64\n"
+        "    filtered output data"
+    },
     {"filter32_apply", filter32_apply, METH_VARARGS, 
-        "Apply filter on input"},
+        "Apply filter on input data (floats)\n\n"
+        "Parameters\n"
+        "----------\n"
+        "filter_handle: int\n"
+        "    So cfilt knows which filter to use.\n"
+        "x: numpy array, dtype: float32\n"
+        "    1 dimensional array with floating point data.\n\n"
+        "Returns\n"
+        "-------\n"
+        "y: arraylike: dtype: float32\n"
+        "    filtered output data"
+    },
     {NULL,NULL,0,NULL}
 };
 
@@ -254,11 +296,3 @@ static PyObject* filter64_apply(PyObject *self, PyObject *args)
 
     return PyArray_Return(r);
 }
-
-static PyObject * test(PyObject *self, PyObject *args)
-{
-    printf("Test function\n");
-
-    return Py_BuildValue("");
-}
-
