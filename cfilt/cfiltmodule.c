@@ -32,6 +32,9 @@ static PyMethodDef methods[] = {
         "filter: arraylike, dtype=float64\n"
         "    list of second order filter sections (sos) as generated "
         "by scipy.signal\n"
+        "handle: int, optional\n"
+        "    if specified, reuse existing filter. "
+        "Filter state will be cleared.\n\n"
         "Returns\n"
         "-------\n"
         "filter_handle: int\n"
@@ -44,6 +47,9 @@ static PyMethodDef methods[] = {
         "filter: arraylike, dtype=float32\n"
         "    list of second order filter sections (sos) as generated "
         "by scipy.signal\n"
+        "handle: int, optional\n"
+        "    if specified, reuse existing filter. "
+        "Filter state will be cleared.\n\n"
         "Returns\n"
         "-------\n"
         "filter_handle: int\n"
@@ -110,8 +116,10 @@ PyInit_cfilt(void)
 static PyObject* filter32_init(PyObject *self, PyObject *args)
 {
     PyObject *data_obj;
-    /* Parse the input tuple */
-    if (!PyArg_ParseTuple(args, "O", &data_obj))
+    /* Parse the input arguments */
+    int filter_index = -1;
+    if (!PyArg_ParseTuple(args, "O|i", &data_obj, 
+                &filter_index ))
         return NULL;
 
     PyArrayObject *data_array = (PyArrayObject *)PyArray_FROM_OTF(data_obj, 
@@ -121,10 +129,22 @@ static PyObject* filter32_init(PyObject *self, PyObject *args)
     if (!dim1 || dims[1] != 6) {
         printf("Error, dim 1 should have size 6: [b0 b1 b2 a1 a2]");
         Py_DECREF(data_array);
-        return Py_BuildValue("");
+        return NULL;
     }
 
-    Filter32 *filter = &filters32[num_filters32];
+    // if filter coefficients are OK, handle index
+    if (!(filter_index > 0 && filter_index < MAX_FILTERS)) {
+        if (num_filters32 >= MAX_FILTERS) {
+            printf("Error, to many filters initialized. Only %d are allowed", 
+                    MAX_FILTERS);
+            Py_DECREF(data_array);
+            return Py_BuildValue("");
+        } else {
+            filter_index = num_filters32++;
+        }
+    }
+
+    Filter32 *filter = &filters32[filter_index];
     filter->num_stages = dims[0];
 
     // loop over stages
@@ -142,26 +162,19 @@ static PyObject* filter32_init(PyObject *self, PyObject *args)
         filter->coeffs[offset+4] = -row[5];
     }
 
-    if (num_filters32 >= MAX_FILTERS) {
-        printf("Error, to many filters initialized. Only %d are allowed", 
-                MAX_FILTERS);
-        Py_DECREF(data_array);
-        return Py_BuildValue("");
-    }
-
-    filter_init_32(&filters32[num_filters32]);
-    int index = num_filters32;
-    num_filters32++;
+    filter_init_32(&filters32[filter_index]);
 
     Py_DECREF(data_array);
-    return Py_BuildValue("i", index);
+    return Py_BuildValue("i", filter_index);
 }
 
 static PyObject* filter64_init(PyObject *self, PyObject *args)
 {
     PyObject *data_obj;
     /* Parse the input tuple */
-    if (!PyArg_ParseTuple(args, "O", &data_obj))
+    int filter_index = -1;
+    if (!PyArg_ParseTuple(args, "O|i", &data_obj, 
+                &filter_index ))
         return NULL;
 
     PyArrayObject *data_array = (PyArrayObject *)PyArray_FROM_OTF(data_obj, 
@@ -175,7 +188,19 @@ static PyObject* filter64_init(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
-    Filter64 *filter = &filters64[num_filters64];
+    // if filter coefficients are OK, handle index
+    if (!(filter_index > 0 && filter_index < MAX_FILTERS)) {
+        if (num_filters64 >= MAX_FILTERS) {
+            printf("Error, to many filters initialized. Only %d are allowed", 
+                    MAX_FILTERS);
+            Py_DECREF(data_array);
+            return Py_BuildValue("");
+        } else {
+            filter_index = num_filters64++;
+        }
+    }
+
+    Filter64 *filter = &filters64[filter_index];
     filter->num_stages = dims[0];
 
     // loop over stages
@@ -193,19 +218,10 @@ static PyObject* filter64_init(PyObject *self, PyObject *args)
         filter->coeffs[offset+4] = -row[5];
     }
 
-    if (num_filters64 >= MAX_FILTERS) {
-        printf("Error, to many filters initialized. Only %d are allowed", 
-                MAX_FILTERS);
-        Py_DECREF(data_array);
-        return Py_BuildValue("");
-    }
-
-    filter_init_64(&filters64[num_filters64]);
-    int index = num_filters64;
-    num_filters64++;
+    filter_init_64(&filters64[filter_index]);
 
     Py_DECREF(data_array);
-    return Py_BuildValue("i", index);
+    return Py_BuildValue("i", filter_index);
 }
 
 static PyObject* filter32_apply(PyObject *self, PyObject *args)
