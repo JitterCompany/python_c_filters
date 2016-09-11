@@ -114,17 +114,17 @@ def plot_filter_response(freqs, mag, fig=None, label=None, fs=None):
     plt.ylabel('Amplitude [dB]', color='b')
     plt.xlabel('Frequency ' + ('[Hz]'if fs else '[rad/sample]' ))
     
-def optimal_filter(q, fs):
+def optimal_filter(q, fs, gain_sb=60, gain_pb=1e-7, ftype='ellip'):
     results = defaultdict(list)
-    for n in range(2,62):
-        f, ba = get_decimation_filter(q, gpass_dB=0.00001, gstop_dB=60, 
-                                      low_cut_off_factor=n, ftype='ellip')
+    for n in range(2,25):
+        f, ba = get_decimation_filter(q, gpass_dB=gain_pb, gstop_dB=gain_sb, 
+                                      low_cut_off_factor=n, ftype=ftype)
         a_f = np.abs(f)
         m = np.min(a_f[a_f>0])
         num_stages = len(f)
         results[num_stages].append((n, m, ba))
 
-    ax = plt.figure().gca()
+    ax = plt.figure(figsize=(14,5)).gca()
     ax.set_title('Trade-off curves for q = %d' % q)
     
     print("Optimal results for q = %d" % q)
@@ -136,7 +136,7 @@ def optimal_filter(q, fs):
         
         ax.plot(x,y, 'x-', label="%d stages" % k)
 
-        fig2 = plt.figure()
+        fig2 = plt.figure(figsize=(14,5))
         for d in data:
             w,h = signal.freqz(*d)
             plot_filter_response(w / np.pi * (fs/2), h, fig=fig2, fs=fs)

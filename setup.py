@@ -13,7 +13,7 @@ module = Extension('cfilt',
         extra_compile_args=['-std=c99', '-DARM_MATH_CM4', '-DTEST', '-Xlinker -dead_strip'])
 
 setup(name= 'cfilt',
-        version = '1.0.1',
+        version = '1.0.2',
         description = 'This is a package',
         packages = find_packages(),
         ext_modules = [module])
