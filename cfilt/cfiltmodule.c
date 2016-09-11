@@ -252,7 +252,7 @@ static PyObject* filter32_apply(PyObject *self, PyObject *args)
     
     npy_intp index[] = {0,0};
     float *data_row = PyArray_GetPtr(data_array, index);
-    float y[N];
+    float *y = malloc(N*sizeof(float));
     Filter32 filter = filters32[filter_index];
     filter_apply_32(&filter, data_row, y, N);
     Py_DECREF(data_array);
@@ -265,6 +265,7 @@ static PyObject* filter32_apply(PyObject *self, PyObject *args)
     for (int i =0; i < N; i++) {
         buffer[i] = y[i];
     }
+    free (y);
 
     return PyArray_Return(r);
 }
@@ -296,7 +297,7 @@ static PyObject* filter64_apply(PyObject *self, PyObject *args)
     
     npy_intp index[] = {0,0};
     double *data_row = PyArray_GetPtr(data_array, index);
-    double y[N];
+    double *y = malloc(N*sizeof(double));
     Filter64 filter = filters64[filter_index];
     filter_apply_64(&filter, data_row, y, N);
     Py_DECREF(data_array);
@@ -309,6 +310,7 @@ static PyObject* filter64_apply(PyObject *self, PyObject *args)
     for (int i =0; i < N; i++) {
         buffer[i] = y[i];
     }
+    free (y);
 
     return PyArray_Return(r);
 }
